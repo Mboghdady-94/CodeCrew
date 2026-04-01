@@ -23,6 +23,7 @@ public class GroupOfCards {
 
     public GroupOfCards(int size) {
         this.size = size;
+        this.cards = new ArrayList<>();
     }
 
     /**
@@ -32,6 +33,10 @@ public class GroupOfCards {
      */
     public ArrayList<Card> getCards() {
         return cards;
+    }
+    
+    public void addCard(Card c){
+        cards.add(c);
     }
 
     public void shuffle() {
