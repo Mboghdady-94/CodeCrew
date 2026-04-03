@@ -5,48 +5,42 @@
 package ca.sheridancollege.project;
 
 /**
+ * This class represents a Wild UNO card (Wild or Wild Draw Four). The card type is
+ * immutable once created, but the chosen color is set when the player plays the
+ * card.
  *
- * @author mahmoudelboghdadi
+ * @author MarwahAlAnssari
  */
 public class WildCard extends Card {
- 
-    private boolean isDrawFour;
-    // The active color is set when the player plays this card
+
+    private final boolean isDrawFour;//true if it's a Wild Draw Four, false if regular Wild, immutable
+    // The color of the Wild card is chosen by the player after playing this card
     private String chosenColor;
- 
-    /**
-     * Creates a WildCard.
-     *
-     * @param isDrawFour true if this is a Wild Draw Four, false for a plain Wild
-     */
+
+    // Creates a new WildCard
+    // isDrawFour is true for Wild Draw Four, false for a regular Wild
     public WildCard(boolean isDrawFour) {
         this.isDrawFour = isDrawFour;
-        this.chosenColor = "";
+        this.chosenColor = "";// no color chosen yet until the card is played
     }
- 
-    /**
-     * @return true if this card is a Wild Draw Four
-     */
+
+    // returns true if card is a Wild Draw Four, false if it is a regular Wild
     public boolean isDrawFour() {
         return isDrawFour;
     }
- 
-    /**
-     * @return the color chosen by the player after playing this card
-     */
+
+    // returns the color chosen by the player after playing this card
     public String getChosenColor() {
         return chosenColor;
     }
- 
-    /**
-     * Sets the active color after this wild card is played.
-     *
-     * @param color the color chosen by the player
-     */
+
+    // This method sets the color of card after the wild card is played
     public void setChosenColor(String color) {
         this.chosenColor = color;
     }
- 
+
+    // overrides toString() in the Card class
+    // returns "Wild Draw Four" or "Wild" depending on the card type 
     @Override
     public String toString() {
         if (isDrawFour) {
@@ -55,4 +49,3 @@ public class WildCard extends Card {
         return "Wild";
     }
 }
-

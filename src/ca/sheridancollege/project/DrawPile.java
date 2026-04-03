@@ -42,12 +42,12 @@ public class DrawPile extends GroupOfCards {
             }
  
             // Two Skip, two Reverse, two Draw Two per color
-            getCards().add(new ActionCard("Skip", CardType.Skip, color));
-            getCards().add(new ActionCard("Skip", CardType.Skip, color));
-            getCards().add(new ActionCard("Reverse", CardType.Reverse, color));
-            getCards().add(new ActionCard("Reverse", CardType.Reverse, color));
-            getCards().add(new ActionCard("Draw Two", CardType.DrawTwo, color));
-            getCards().add(new ActionCard("Draw Two", CardType.DrawTwo, color));
+            getCards().add(new ActionCard(CardType.Skip, color));
+            getCards().add(new ActionCard(CardType.Skip, color));
+            getCards().add(new ActionCard(CardType.Reverse, color));
+            getCards().add(new ActionCard(CardType.Reverse, color));
+            getCards().add(new ActionCard(CardType.DrawTwo, color));
+            getCards().add(new ActionCard(CardType.DrawTwo, color));
         }
  
         // Four Wild, four Wild Draw Four

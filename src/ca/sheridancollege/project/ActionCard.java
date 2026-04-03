@@ -5,51 +5,35 @@
 package ca.sheridancollege.project;
 
 /**
- *
- * @author mahmoudelboghdadi
+ * This class represents an action UNO card (Skip, Reverse, Draw Two) with a fixed color
+ * and type.
+ * @author MarwahAlAnssari
  */
 public class ActionCard extends Card {
- 
-    private String symbol;
-    private CardType type;
-    private String color;
- 
-    /**
-     * Creates a new ActionCard.
-     *
-     * @param symbol the display symbol (e.g., "Skip", "Reverse", "Draw Two")
-     * @param type   the CardType enum value
-     * @param color  the card color
-     */
-    public ActionCard(String symbol, CardType type, String color) {
-        this.symbol = symbol;
+
+    private final CardType type;//card type using the enum e.g. CardType.Skip, immutable
+    private final String color;// card color (Red, Blue, Green, Yellow), immutable
+
+    // Creates a new ActionCard with a fixed type and color
+    public ActionCard(CardType type, String color) {
         this.type = type;
         this.color = color;
     }
- 
-    /**
-     * @return the symbol label for this card
-     */
-    public String getSymbol() {
-        return symbol;
-    }
- 
-    /**
-     * @return the CardType of this action card
-     */
+
+    // returns the CardType of this action card
     public CardType getType() {
         return type;
     }
- 
-    /**
-     * @return the color of this card
-     */
+
+    // returns the color of this card
     public String getColor() {
         return color;
     }
- 
+    // overrides toString() in the Card class
+    // returns a String representation of the UNO card e.g. "Red Skip"
+
     @Override
     public String toString() {
-        return color + " " + symbol;
+        return color + " " + type;
     }
 }

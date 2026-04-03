@@ -5,14 +5,10 @@
 package ca.sheridancollege.project;
 
 /**
- *
- * @author mahmoudelboghdadi
+ * This class is list of constants defining every card type in UNO
+ * @author MarwahAlAnssari
  */
 public enum CardType {
-    Number,
-    Skip,
-    Reverse,
-    DrawTwo,
-    Wild,
-    WildDrawFour
+    Number, Skip, Reverse, DrawTwo, Wild, WildDrawFour
+
 }
