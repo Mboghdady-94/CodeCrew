@@ -9,16 +9,18 @@ import java.util.ArrayList;
 /**
  *
  * @author mahmoudelboghdadi
+ * @contributer ajayprashad
  */
 public class DrawPile extends GroupOfCards {
  
     private static final String[] COLORS = {"Red", "Green", "Blue", "Yellow"};
- 
+    private static final int DECK_SIZE = 108;
+
     /**
      * Creates an empty DrawPile.
      */
     public DrawPile() {
-        super(108);
+        super(DECK_SIZE);
     }
  
     /**
@@ -29,31 +31,31 @@ public class DrawPile extends GroupOfCards {
      * - 4 Wild, 4 Wild Draw Four (8 total)
      */
     public void buildDeck() {
-        getCards().clear();
+        ArrayList<Card> cards = getCards();
+        cards.clear();
  
         for (String color : COLORS) {
             // One zero per color
-            getCards().add(new NumberCard(0, color));
+            addCard(new NumberCard(0, color));
  
             // Two of each 1-9
             for (int num = 1; num <= 9; num++) {
-                getCards().add(new NumberCard(num, color));
-                getCards().add(new NumberCard(num, color));
+                for (int i = 0; i < 2; i++) {
+                    addCard(new NumberCard(num, color));
+                }
             }
  
             // Two Skip, two Reverse, two Draw Two per color
-            getCards().add(new ActionCard(CardType.Skip, color));
-            getCards().add(new ActionCard(CardType.Skip, color));
-            getCards().add(new ActionCard(CardType.Reverse, color));
-            getCards().add(new ActionCard(CardType.Reverse, color));
-            getCards().add(new ActionCard(CardType.DrawTwo, color));
-            getCards().add(new ActionCard(CardType.DrawTwo, color));
+          for (int i = 0; i < 2; i++) {
+                addCard(new ActionCard(CardType.Skip, color));
+                addCard(new ActionCard(CardType.Reverse, color));
+                addCard(new ActionCard(CardType.DrawTwo, color));
+            }
         }
- 
         // Four Wild, four Wild Draw Four
         for (int i = 0; i < 4; i++) {
-            getCards().add(new WildCard(false));
-            getCards().add(new WildCard(true));
+            addCard(new WildCard(false));
+            addCard(new WildCard(true));
         }
  
         shuffle();
@@ -61,14 +63,16 @@ public class DrawPile extends GroupOfCards {
  
     /**
      * Draws the top card from the draw pile.
-     *
+     * The top card is the last element in the list.
+
      * @return the top card, or null if the pile is empty
      */
     public Card draw() {
         if (isEmpty()) {
             return null;
         }
-        return getCards().remove(getCards().size() - 1);
+        ArrayList<Card> cards = getCards();
+        return cards.remove(cards.size() - 1);
     }
  
     /**
@@ -78,14 +82,13 @@ public class DrawPile extends GroupOfCards {
      * @param discardedCards the cards from the discard pile to recycle
      */
     public void refillDraw(ArrayList<Card> discardedCards) {
-        getCards().addAll(discardedCards);
+        for (Card card : discardedCards) {
+            addCard(card);
+        }
         shuffle();
     }
  
     /**
      * @return true if there are no cards left in the draw pile
      */
-    public boolean isEmpty() {
-        return getCards().isEmpty();
-    }
 }
