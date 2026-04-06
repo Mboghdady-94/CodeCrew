@@ -96,26 +96,4 @@ public class GameRuleValidator {
         return null;
     }
 
-    /**
-     * @return true if the current top card is a Wild card of any kind
-     */
-//    public boolean isWildCard() {
-//        return topCard instanceof WildCard;
-//    }
-    /**
-     * Returns the current active color from the top card. For WildCards this
-     * returns the chosen color; for others it returns their own color. // * //
-     *
-     * * @return the active color string //
-     */
-//    public String getActiveColor() {
-//        if (topCard instanceof WildCard) {
-//            return ((WildCard) topCard).getChosenColor();
-//        } else if (topCard instanceof NumberCard) {
-//            return ((NumberCard) topCard).getColor();
-//        } else if (topCard instanceof ActionCard) {
-//            return ((ActionCard) topCard).getColor();
-//        }
-//        return "";
-//    }
 }
