@@ -13,10 +13,10 @@ import java.util.ArrayList;
 public class TurnManager {
 
     private int direction;             // 1 = clockwise, -1 = counter-clockwise
-    private ArrayList<Player> players; // reference to the registered players
-    private DrawPile drawPile;         // used to draw penalty cards
-    private DiscardPile discardPile;   // used to reshuffle when the draw pile is empty
-    private GameView view;             // used to display turn effects
+    private final ArrayList<Player> players; // reference to the registered players
+    private final DrawPile drawPile;         // used to draw penalty cards
+    private final DiscardPile discardPile;   // used to reshuffle when the draw pile is empty
+    private final GameView view;             // used to display turn effects
 
     // creates a new TurnManager with references to the shared game components
     public TurnManager(ArrayList<Player> players, DrawPile drawPile,
