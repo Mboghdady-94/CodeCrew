@@ -6,23 +6,25 @@ package ca.sheridancollege.project;
 
 import java.util.ArrayList;
 
-/**
- *
- * @author mahmoudelboghdadi
+/** 
+ * The discard pile in UNO
+ * @author VaqasAmer
  */
 public class DiscardPile extends GroupOfCards {
- 
-    /**
-     * Creates an empty DiscardPile.
-     */
+    
+     // creates a new empty DiscardPile with a capacity matching the UNO deck size
     public DiscardPile() {
-        super(0);
+        super(UNOCards.DECK_SIZE);
     }
- 
+    
+     // adds a played card to the top of the discard pile
+    public void addCard(Card card) {
+        getCards().add(card);
+    }
+    
     /**
-     * Returns the top card of the discard pile without removing it.
-     *
-     * @return the top card, or null if the pile is empty
+     * returns the top card of the discard pile without removing it
+     * returns null if the discard pile is empty
      */
     public Card getTopCard() {
         if (getCards().isEmpty()) {
@@ -30,25 +32,14 @@ public class DiscardPile extends GroupOfCards {
         }
         return getCards().get(getCards().size() - 1);
     }
- 
+
     /**
-     * Adds a card on top of the discard pile.
-     *
-     * @param c the card to place on top
+     * removes and returns all cards except the top card for recycling into the draw pile
+     * the top card stays so the game state remains valid
      */
-    public void addCard(Card c) {
-        getCards().add(c);
-    }
- 
-    /**
-     * Removes and returns all cards except the top card.
-     * Used to refill the draw pile when it runs out.
-     *
-     * @return list of cards to recycle into the draw pile
-     */
-    public ArrayList<Card> refillDraw() {
+        public ArrayList<Card> refillDraw() {
         ArrayList<Card> recycled = new ArrayList<>();
-        // Keep only the top card in the discard pile
+        // Keeps only the top card in the discard pile
         while (getCards().size() > 1) {
             recycled.add(getCards().remove(0));
         }

@@ -5,11 +5,11 @@
 package ca.sheridancollege.project;
 
 /**
- *
+ *Start of UNO game application
  * @author mahmoudelboghdadi
  */
 public class GameMain {
-    
+    // creates a new UNOGame and starts it
     public static void main(String[] args) {
         UNOGame game = new UNOGame();
         game.play();

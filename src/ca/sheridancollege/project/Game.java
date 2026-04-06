@@ -12,7 +12,7 @@ import java.util.ArrayList;
  * given.
  *
  * @author dancye
- * @author Paul Bonenfant Jan 2020
+ * @author MahmoudElboghdady
  */
 public abstract class Game {
 

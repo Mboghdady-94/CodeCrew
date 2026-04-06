@@ -8,301 +8,189 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- *
+ * Coordinates the UNO game from start to finish.
  * @author mahmoudelboghdadi
  */
 public class UNOGame extends Game {
 
-    private int direction;          // 1 = clockwise, -1 = counter-clockwise
-    private UNOPlayer currentTurn;
-    private DrawPile drawPile;
-    private DiscardPile discardPile;
-    private GameRuleValidator validator;
-    private Scanner scanner;
-    private String winner;
+    private DrawPile drawPile;           // the pile players draw cards from
+    private DiscardPile discardPile;     // the pile played cards go onto
+    private GameRuleValidator validator; // validates card plays and tracks active color
+    private GameView view;               // handles all console output
+    private TurnManager turnManager;     // manages turn order and action card effects
+    private PlayerRegistration registration; // handles player registration
+    private Scanner scanner;             // reads keyboard input from players
+    private String winner;               // stores the winner's name when the game ends
 
+    // creates a new UNOGame and initialises all shared components
     public UNOGame() {
         super("UNO");
-        this.direction = 1;
         this.drawPile = new DrawPile();
         this.discardPile = new DiscardPile();
         this.scanner = new Scanner(System.in);
         this.winner = null;
+        this.view = new GameView();
+        this.registration = new PlayerRegistration(view);
     }
 
-    /**
-     * Registers 2 to 4 players with name and password validation.
-     *
-     * @param players the array of UNOPlayers to register
-     */
-    public void registerPlayers(UNOPlayer[] players) {
-        UNOPasswordValidator passwordValidator = new UNOPasswordValidator();
-        ArrayList<Player> registered = new ArrayList<>();
-
-        for (int i = 0; i < players.length; i++) {
-            System.out.println("Registering player " + (i + 1) + ":");
-            System.out.print("Enter name: ");
-            String name = scanner.nextLine().trim();
-
-            String password = "";
-            while (true) {
-                System.out.print("Enter password (more than 7 chars, must include a special character): ");
-                password = scanner.nextLine().trim();
-                if (passwordValidator.validate(password)) {
-                    break;
-                }
-                System.out.println("Invalid password. Try again.");
-            }
-
-            registered.add(new UNOPlayer(name, password));
-            System.out.println(name + " registered successfully.");
-            System.out.println("Registered players so far:");
-            for (Player p : registered) {
-                System.out.println("  - " + p.getName());
-            }
-            System.out.println();
-        }
-
-        setPlayers(registered);
-    }
-
-    /**
-     * Starts the game: builds deck, deals 7 cards to each player,
-     * flips the first card onto the discard pile.
-     */
+    // builds and shuffles the deck, deals 7 cards to each player,
+    // and flips the first non-wild card onto the discard pile
     public void startGame() {
         drawPile.buildDeck();
+        dealCards();
 
-        // Deal 7 cards to each player
+        // keep drawing until the first card is not a Wild card
+        Card firstCard = drawPile.draw();
+        while (firstCard instanceof WildCard) {
+            drawPile.getCards().add(0, firstCard);
+            firstCard = drawPile.draw();
+        }
+
+        discardPile.addCard(firstCard);
+        view.showStartingCard(firstCard);
+
+        validator = new GameRuleValidator(firstCard);
+
+        // TurnManager is created here once the player list is finalised
+        turnManager = new TurnManager(getPlayers(), drawPile, discardPile, view);
+        turnManager.applyOpeningCardEffect(firstCard);
+        
+        view.showGameStart(getPlayers().size());
+    }
+
+    // deals 7 cards to every registered player
+    private void dealCards() {
         for (Player p : getPlayers()) {
             UNOPlayer up = (UNOPlayer) p;
             for (int i = 0; i < 7; i++) {
                 up.drawCard(drawPile.draw());
             }
         }
-
-        // Flip the first card onto the discard pile (re-draw if it's a wild)
-        Card firstCard = drawPile.draw();
-        while (firstCard instanceof WildCard) {
-            drawPile.getCards().add(0, firstCard); // put it back at the bottom
-            firstCard = drawPile.draw();
-        }
-        discardPile.addCard(firstCard);
-        System.out.println("Starting card: " + firstCard);
-
-        validator = new GameRuleValidator(firstCard);
-
-        // If first card is an action card, apply its effect before turn 1
-        applyCardEffect(firstCard, null);
     }
 
-    /**
-     * Main game loop. Runs until a player empties their hand.
-     */
+    // main game loop — registers players, starts the game, then cycles turns
+    // until a player empties their hand
     @Override
     public void play() {
-        System.out.println("\n=== Welcome to UNO! ===\n");
+        view.showWelcome();
 
-        // Collect player count
-        int numPlayers = 0;
-        while (numPlayers < 2 || numPlayers > 4) {
-            System.out.print("How many players? (2-4): ");
-            try {
-                numPlayers = Integer.parseInt(scanner.nextLine().trim());
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a number.");
-            }
-        }
-
-        registerPlayers(new UNOPlayer[numPlayers]);
+        int numPlayers = collectPlayerCount();
+        setPlayers(registration.register(numPlayers, scanner));
         startGame();
 
         int currentIndex = 0;
 
         while (true) {
             UNOPlayer current = (UNOPlayer) getPlayers().get(currentIndex);
-            currentTurn = current;
 
-            System.out.println("\n--- " + current.getName() + "'s turn ---");
-            System.out.println("Top card: " + discardPile.getTopCard());
-            System.out.println("Active color: " + validator.getActiveColor());
-            System.out.println("Your hand:");
+            view.showTurnHeader(current.getName());
+            view.showTopCard(discardPile.getTopCard(), validator.getActiveColor());
+            view.showHand(current.getHand().getCards());
 
-            ArrayList<Card> hand = current.getHand().getCards();
-            for (int i = 0; i < hand.size(); i++) {
-                System.out.println("  [" + i + "] " + hand.get(i));
-            }
-
-            // Find playable cards
-            ArrayList<Integer> playableIndexes = new ArrayList<>();
-            for (int i = 0; i < hand.size(); i++) {
-                if (validator.isCardPlayable(hand.get(i))) {
-                    playableIndexes.add(i);
-                }
-            }
-
-            Card playedCard = null;
+            ArrayList<Integer> playableIndexes = findPlayableCards(current);
+            Card playedCard;
 
             if (playableIndexes.isEmpty()) {
-                // No playable card: draw one
-                System.out.println("No playable card. Drawing a card...");
-                Card drawn = safeDrawCard();
-                if (drawn != null) {
-                    current.drawCard(drawn);
-                    System.out.println("Drew: " + drawn);
-                    if (validator.isCardPlayable(drawn)) {
-                        System.out.println("The drawn card is playable! Playing it automatically.");
-                        playedCard = current.playCard(current.getHand().getCards().size() - 1);
-                    } else {
-                        System.out.println("Card is not playable. Turn passes.");
-                    }
-                } else {
-                    System.out.println("No cards available to draw. Turn passes.");
-                }
+                playedCard = handleNoPlayableCard(current);
             } else {
-                // Let the player choose a card
-                int choice = -1;
-                while (true) {
-                    System.out.print("Enter the number of the card to play (playable cards: " + playableIndexes + "): ");
-                    try {
-                        choice = Integer.parseInt(scanner.nextLine().trim());
-                        if (playableIndexes.contains(choice)) {
-                            break;
-                        }
-                        System.out.println("That card is not playable. Choose from: " + playableIndexes);
-                    } catch (NumberFormatException e) {
-                        System.out.println("Please enter a valid number.");
-                    }
-                }
-                playedCard = current.playCard(choice);
+                playedCard = handleCardSelection(current, playableIndexes);
             }
 
-            // If a card was played, process it
             if (playedCard != null) {
-                // Handle wild card color selection
+                // if a Wild card was played, ask the player to choose a color
                 if (playedCard instanceof WildCard) {
-                    String chosen = current.chooseColor(scanner);
+                    String chosen = current.chooseColor(scanner, view);
                     ((WildCard) playedCard).setChosenColor(chosen);
-                    System.out.println(current.getName() + " chose: " + chosen);
+                    view.showChosenColor(current.getName(), chosen);
                 }
 
                 discardPile.addCard(playedCard);
                 validator.setTopCard(playedCard);
-                System.out.println(current.getName() + " played: " + playedCard);
+                view.showPlayedCard(current.getName(), playedCard);
 
-                // Check win condition
+                // check if the player has emptied their hand
                 if (current.getHand().isEmpty()) {
                     winner = current.getName();
                     declareWinner();
                     break;
                 }
 
-                // Apply action card effects; they may shift the next index
-                currentIndex = applyCardEffect(playedCard, currentIndex);
+                currentIndex = turnManager.applyCardEffect(playedCard, currentIndex);
             }
 
-            // Advance to next player
-            currentIndex = nextIndex(currentIndex);
+            currentIndex = turnManager.nextIndex(currentIndex);
         }
 
         scanner.close();
     }
 
-    /**
-     * Draws a card safely, reshuffling the discard pile into the draw pile if needed.
-     *
-     * @return a Card, or null if neither pile has cards
-     */
-    private Card safeDrawCard() {
-        if (drawPile.isEmpty()) {
-            System.out.println("Draw pile is empty. Reshuffling discard pile...");
-            ArrayList<Card> recycled = discardPile.refillDraw();
-            if (recycled.isEmpty()) {
-                return null;
-            }
-            drawPile.refillDraw(recycled);
-        }
-        return drawPile.draw();
-    }
-
-    /**
-     * Applies the effect of an action card and returns the (possibly adjusted) current index.
-     *
-     * @param card         the card that was just played
-     * @param currentIndex the current player index (null if called for the starting card)
-     * @return the updated current index after applying effects
-     */
-    private int applyCardEffect(Card card, Integer currentIndex) {
-        if (currentIndex == null) {
-            // Called for the opening card; direction may be reversed but turns haven't started
-            if (card instanceof ActionCard) {
-                ActionCard ac = (ActionCard) card;
-                if (ac.getType() == CardType.Reverse) {
-                    direction *= -1;
-                }
-            }
-            return 0;
-        }
-
-        if (card instanceof ActionCard) {
-            ActionCard ac = (ActionCard) card;
-
-            if (ac.getType() == CardType.Skip) {
-                System.out.println("Skip! Next player loses their turn.");
-                currentIndex = nextIndex(currentIndex); // skip one extra
-
-            } else if (ac.getType() == CardType.Reverse) {
-                direction *= -1;
-                System.out.println("Reverse! Direction changed.");
-                // With 2 players, Reverse acts like Skip
-                if (getPlayers().size() == 2) {
-                    currentIndex = nextIndex(currentIndex);
-                }
-
-            } else if (ac.getType() == CardType.DrawTwo) {
-                int nextIdx = nextIndex(currentIndex);
-                UNOPlayer next = (UNOPlayer) getPlayers().get(nextIdx);
-                System.out.println(next.getName() + " must draw 2 cards and loses their turn!");
-                for (int i = 0; i < 2; i++) {
-                    Card drawn = safeDrawCard();
-                    if (drawn != null) next.drawCard(drawn);
-                }
-                currentIndex = nextIdx; // the penalized player becomes current so advance skips them
-            }
-
-        } else if (card instanceof WildCard) {
-            WildCard wc = (WildCard) card;
-            if (wc.isDrawFour()) {
-                int nextIdx = nextIndex(currentIndex);
-                UNOPlayer next = (UNOPlayer) getPlayers().get(nextIdx);
-                System.out.println(next.getName() + " must draw 4 cards and loses their turn!");
-                for (int i = 0; i < 4; i++) {
-                    Card drawn = safeDrawCard();
-                    if (drawn != null) next.drawCard(drawn);
-                }
-                currentIndex = nextIdx; // same as DrawTwo logic
+    // asks how many players will play and validates the input is between 2 and 4
+    private int collectPlayerCount() {
+        int numPlayers = 0;
+        while (numPlayers < 2 || numPlayers > 4) {
+            view.promptPlayerCount();
+            try {
+                numPlayers = Integer.parseInt(scanner.nextLine().trim());
+            } catch (NumberFormatException e) {
+                view.showInvalidNumberError();
             }
         }
-
-        return currentIndex;
+        return numPlayers;
     }
 
-    /**
-     * Calculates the next player index based on current direction.
-     *
-     * @param currentIndex the current player's index
-     * @return the next player's index
-     */
-    private int nextIndex(int currentIndex) {
-        int size = getPlayers().size();
-        return ((currentIndex + direction) % size + size) % size;
+    // returns a list of indexes of all cards in the player's hand that are currently playable
+    private ArrayList<Integer> findPlayableCards(UNOPlayer current) {
+        ArrayList<Integer> playableIndexes = new ArrayList<>();
+        ArrayList<Card> hand = current.getHand().getCards();
+        for (int i = 0; i < hand.size(); i++) {
+            if (validator.isCardPlayable(hand.get(i))) {
+                playableIndexes.add(i);
+            }
+        }
+        return playableIndexes;
     }
 
-    /**
-     * Announces the winner.
-     */
+    // handles the case where a player has no playable card
+    // draws one card — plays it automatically if playable, otherwise passes the turn
+    private Card handleNoPlayableCard(UNOPlayer current) {
+        view.showNoPlayableCard();
+        Card drawn = turnManager.safeDrawCard();
+        if (drawn == null) {
+            view.showNoDraw();
+            return null;
+        }
+        current.drawCard(drawn);
+        view.showDrawnCard(drawn);
+        if (validator.isCardPlayable(drawn)) {
+            view.showDrawnCardPlayable();
+            return current.playCard(current.getHand().getCards().size() - 1);
+        }
+        view.showDrawnCardNotPlayable();
+        return null;
+    }
+
+    // prompts the player to choose a card from their playable options
+    // keeps prompting until a valid index is entered
+    private Card handleCardSelection(UNOPlayer current, ArrayList<Integer> playableIndexes) {
+        int choice = -1;
+        while (true) {
+            view.promptCardChoice(playableIndexes);
+            try {
+                choice = Integer.parseInt(scanner.nextLine().trim());
+                if (playableIndexes.contains(choice)) {
+                    break;
+                }
+                view.showNotPlayableError(playableIndexes);
+            } catch (NumberFormatException e) {
+                view.showInvalidCardError();
+            }
+        }
+        return current.playCard(choice);
+    }
+
+    // announces the winner of the game
     @Override
     public void declareWinner() {
-        System.out.println("  " + winner + " wins the game!");
+        view.showWinner(winner);
     }
 }

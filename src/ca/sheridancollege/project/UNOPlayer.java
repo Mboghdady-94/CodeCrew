@@ -7,77 +7,60 @@ package ca.sheridancollege.project;
 import java.util.Scanner;
 
 /**
+ * This class represents a UNO player with a hand of cards and a registered
+ * password. It manages the player's own cards and color selection
  *
- * @author mahmoudelboghdadi
+ * @author YuvrajSinghSahi
  */
 public class UNOPlayer extends Player {
- 
-    private Hand hand;
-    private String password;
- 
-    /**
-     * Creates a UNOPlayer with the given name and password.
-     *
-     * @param name     the player's name
-     * @param password the player's validated password
-     */
+
+    private final Hand hand;       // the cards this player is currently holding
+    private final String password; // the player's registered password, immutable
+
+    // creates a new UNOPlayer with the given name and password
     public UNOPlayer(String name, String password) {
         super(name);
-        this.hand = new Hand();
         this.password = password;
+        this.hand = new Hand();
     }
- 
-    /**
-     * @return the player's hand
-     */
+
+    // returns this player's hand
     public Hand getHand() {
         return hand;
     }
- 
-    /**
-     * Adds a card to the player's hand.
-     *
-     * @param card the card to add
-     */
+
+    // adds a drawn card to player's hand
     public void drawCard(Card card) {
         hand.addCard(card);
     }
- 
-    /**
-     * Plays a card from the player's hand at the given index.
-     *
-     * @param index the index of the card to play
-     * @return the card that was played
-     */
+
+    //plays a card from the player's hand at the given index.
     public Card playCard(int index) {
         return hand.removeCard(index);
     }
- 
+
     /**
-     * Prompts the player to choose a color when playing a Wild card.
-     *
-     * @param scanner the Scanner for keyboard input
-     * @return the chosen color string
+     * Prompts the player to choose a color when playing a Wild card. keeps
+     * asking until a valid color is entered display is Assigned to GameView
      */
-    public String chooseColor(Scanner scanner) {
-        String[] validColors = {"Red", "Green", "Blue", "Yellow"};
-        System.out.println(getName() + ", choose a color (Red, Green, Blue, Yellow):");
+    public String chooseColor(Scanner scanner, GameView view) {
         while (true) {
+            view.promptColorChoice();
             String input = scanner.nextLine().trim();
-            for (String color : validColors) {
+            for (String color : UNOCards.VALID_COLORS) {
                 if (color.equalsIgnoreCase(input)) {
                     return color;
                 }
             }
-            System.out.println("Invalid color. Please enter Red, Green, Blue, or Yellow:");
+            view.showInvalidColorError();
         }
     }
- 
+
     /**
-     * Not used directly in UNO; turn logic is handled by UNOGame.
+     * turn logic is handled by UNOGame, not the player so its empty
      */
     @Override
     public void play() {
-        // Turn logic is delegated to UNOGame
     }
+    
 }

@@ -7,88 +7,76 @@ package ca.sheridancollege.project;
 import java.util.ArrayList;
 
 /**
- *
+ * The draw pile in UNO
  * @author mahmoudelboghdadi
  * @contributer ajayprashad
  */
 public class DrawPile extends GroupOfCards {
- 
-    private static final String[] COLORS = {"Red", "Green", "Blue", "Yellow"};
-    private static final int DECK_SIZE = 108;
 
-    /**
-     * Creates an empty DrawPile.
-     */
+    // creates a new empty DrawPile
     public DrawPile() {
-        super(DECK_SIZE);
+        super(UNOCards.DECK_SIZE);
     }
  
     /**
      * Builds the full 108-card UNO deck and shuffles it.
-     * - 1 zero card per color (4 total)
-     * - 2 of each 1-9 per color (72 total)
-     * - 2 Skip, 2 Reverse, 2 Draw Two per color (24 total)
-     * - 4 Wild, 4 Wild Draw Four (8 total)
+     * 1 zero card per color (4 total)
+     * 2 of each 1-9 per color (72 total)
+     * 2 Skip, 2 Reverse, 2 Draw Two per color (24 total)
+     * 4 Wild, 4 Wild Draw Four (8 total)
      */
     public void buildDeck() {
-        ArrayList<Card> cards = getCards();
-        cards.clear();
+        getCards().clear();
  
-        for (String color : COLORS) {
+                for (String color : UNOCards.VALID_COLORS) {
             // One zero per color
-            addCard(new NumberCard(0, color));
+             getCards().add(new NumberCard(0, color));
  
             // Two of each 1-9
             for (int num = 1; num <= 9; num++) {
                 for (int i = 0; i < 2; i++) {
-                    addCard(new NumberCard(num, color));
+                    getCards().add(new NumberCard(num, color));
                 }
             }
  
             // Two Skip, two Reverse, two Draw Two per color
           for (int i = 0; i < 2; i++) {
-                addCard(new ActionCard(CardType.Skip, color));
-                addCard(new ActionCard(CardType.Reverse, color));
-                addCard(new ActionCard(CardType.DrawTwo, color));
+                getCards().add(new ActionCard(CardType.Skip, color));
+                getCards().add(new ActionCard(CardType.Reverse, color));
+                getCards().add(new ActionCard(CardType.DrawTwo, color));
             }
         }
         // Four Wild, four Wild Draw Four
         for (int i = 0; i < 4; i++) {
-            addCard(new WildCard(false));
-            addCard(new WildCard(true));
+            getCards().add(new WildCard(false));// regular Wild
+            getCards().add(new WildCard(true));  // Wild Draw Four
         }
  
         shuffle();
     }
  
     /**
-     * Draws the top card from the draw pile.
-     * The top card is the last element in the list.
-
-     * @return the top card, or null if the pile is empty
+     *  draws and removes the top card from the draw pile
+     * returns null if the draw pile is empty
      */
     public Card draw() {
-        if (isEmpty()) {
+        if (getCards().isEmpty()) {
             return null;
         }
-        ArrayList<Card> cards = getCards();
-        return cards.remove(cards.size() - 1);
+        return getCards().remove(0);
     }
  
     /**
-     * Refills the draw pile from the discard pile cards (except the top card).
-     * The returned list should remain as the new discard pile (just the top card).
-     *
-     * @param discardedCards the cards from the discard pile to recycle
+     * refills the draw pile using recycled cards from the discard pile (except the top card).
+     *  shuffles the recycled cards before use.
      */
-    public void refillDraw(ArrayList<Card> discardedCards) {
-        for (Card card : discardedCards) {
-            addCard(card);
-        }
+    public void refillDraw(ArrayList<Card> recycledCards) {
+        getCards().addAll(recycledCards);
         shuffle();
     }
- 
-    /**
-     * @return true if there are no cards left in the draw pile
-     */
+
+   public boolean isEmpty() {
+        return getCards().isEmpty();
+    }
+
 }

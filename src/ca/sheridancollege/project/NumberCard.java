@@ -8,7 +8,7 @@ package ca.sheridancollege.project;
  * This class represents  a numbered UNO card with a fixed color and number
  * @author MarwahAlAnssari
  */
-public class NumberCard extends Card {
+public class NumberCard extends UNOCards{
 
     private final int number; // card number (0-9), immutable
     private final String color; // card color (Red, Green, Blue, Yellow), immutable
@@ -25,6 +25,7 @@ public class NumberCard extends Card {
     }
 
     // returns the card color
+    @Override
     public String getColor() {
         return color;
     }

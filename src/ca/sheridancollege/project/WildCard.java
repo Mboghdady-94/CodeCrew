@@ -11,7 +11,7 @@ package ca.sheridancollege.project;
  *
  * @author MarwahAlAnssari
  */
-public class WildCard extends Card {
+public class WildCard extends UNOCards {
 
     private final boolean isDrawFour;//true if it's a Wild Draw Four, false if regular Wild, immutable
     // The color of the Wild card is chosen by the player after playing this card
@@ -30,7 +30,8 @@ public class WildCard extends Card {
     }
 
     // returns the color chosen by the player after playing this card
-    public String getChosenColor() {
+    @Override
+    public String getColor() {
         return chosenColor;
     }
 
@@ -48,4 +49,5 @@ public class WildCard extends Card {
         }
         return "Wild";
     }
+
 }

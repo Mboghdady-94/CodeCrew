@@ -4,33 +4,51 @@
  */
 package ca.sheridancollege.project;
 
+import java.util.ArrayList;
+
 /**
+ * This class represents player's hand of cards in UNO
  *
- * @author mahmoudelboghdadi
+ * @author YuvrajSinghSahi
  */
-public class Hand extends GroupOfCards {
- 
-    /**
-     * Creates an empty hand.
-     */
+public class Hand {
+
+    private ArrayList<Card> cards;   // the cards currently in the player's hand
+
+    // creates a new empty Hand
     public Hand() {
-        super(0); // hand size is dynamic
+        this.cards = new ArrayList<>();
     }
- 
+    // adds a card to this hand
+
+    public void addCard(Card card) {
+        cards.add(card);
+    }
+
     /**
-     * Removes and returns the card at the given index.
-     *
-     * @param index the position of the card to remove
-     * @return the removed card
+     * removes and returns the card at the given index from this hand
+     * index is the position of the card to remove returns null if the index is
+     * out of range
      */
     public Card removeCard(int index) {
-        return getCards().remove(index);
+        if (index < 0 || index >= cards.size()) {
+            return null;
+        }
+        return cards.remove(index);
     }
- 
-    /**
-     * @return true if the hand has no cards left
-     */
+    // returns the list of cards currently in this hand
+
+    public ArrayList<Card> getCards() {
+        return cards;
+    }
+
+    // returns the number of cards currently in this hand
+    public int getSize() {
+        return cards.size();
+    }
+
+    //return true if the hand has no cards left
     public boolean isEmpty() {
-        return getCards().isEmpty();
+        return cards.isEmpty();
     }
 }

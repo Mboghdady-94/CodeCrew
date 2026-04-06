@@ -6,40 +6,33 @@ package ca.sheridancollege.project;
 
 /**
  *
- * @author mahmoudelboghdadi
+ * @author YuvrajSinghSahi
  */
-public class PasswordValidator {
- 
-    private int minLength;
-    private boolean hasSpecialChar;
- 
+public abstract class PasswordValidator {
+
+    private final int minLength;
+    private final boolean hasSpecialChar;
+
     /**
-     * Creates a PasswordValidator with default rules:
-     * length > 7 and must contain at least one special character.
+     * creates a new PasswordValidator with the given rules: length > 7 and must
+     * contain at least one special character.
      */
     public PasswordValidator() {
         this.minLength = 7;
         this.hasSpecialChar = true;
     }
- 
-    /**
-     * Validates a password against the rules.
-     *
-     * @param password the password to check
-     * @return true if the password meets all requirements
-     */
-    public boolean validate(String password) {
-        if (password == null || password.length() <= minLength) {
-            return false;
-        }
-        if (hasSpecialChar) {
-            for (char c : password.toCharArray()) {
-                if (!Character.isLetterOrDigit(c)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        return true;
+
+    protected int getMinLength() {
+        return minLength;
     }
+
+    protected boolean isHasSpecialChar() {
+        return hasSpecialChar;
+    }
+
+    /*
+    * validates a password against the rules defined by  validator
+    * returns true if the password meets all requirements, otherwise false 
+     */
+    public abstract boolean validate(String password);
 }

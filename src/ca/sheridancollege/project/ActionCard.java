@@ -9,7 +9,7 @@ package ca.sheridancollege.project;
  * and type.
  * @author MarwahAlAnssari
  */
-public class ActionCard extends Card {
+public class ActionCard extends UNOCards {
 
     private final CardType type;//card type using the enum e.g. CardType.Skip, immutable
     private final String color;// card color (Red, Blue, Green, Yellow), immutable
@@ -26,12 +26,12 @@ public class ActionCard extends Card {
     }
 
     // returns the color of this card
+    @Override
     public String getColor() {
         return color;
     }
     // overrides toString() in the Card class
     // returns a String representation of the UNO card e.g. "Red Skip"
-
     @Override
     public String toString() {
         return color + " " + type;

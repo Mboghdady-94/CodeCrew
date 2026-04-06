@@ -8,8 +8,7 @@ package ca.sheridancollege.project;
 /**
  * A class that models each Player in the game. Players have an identifier, which should be unique.
  *
- * @author dancye
- * @author Paul Bonenfant Jan 2020
+ * @author YuvrajSinghSahi
  */
 public abstract class Player {
 
@@ -45,19 +44,5 @@ public abstract class Player {
      * with logic to play your game.
      */
     public abstract void play();
-
-    /**
- * Displays basic player information
- */
-public void displayPlayerInfo() {
-    System.out.println("Player name is: " + name);
-}
-
-/**
- * Checks if player name is valid (not empty)
- */
-public boolean isValidName() {
-    return name != null && !name.trim().isEmpty();
-}
 
 }
